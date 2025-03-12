@@ -1,0 +1,882 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        Gerenciamento de Tarefas
+      {% endblock %}
+    </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <style>
+      :root {
+        --primary-color: #4a6fa5;
+        --secondary-color: #166088;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --sidebar-width: 250px;
+        --sidebar-collapsed-width: 70px;
+        --transition-speed: 0.3s;
+      }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        transition: margin-left var(--transition-speed);
+        margin-left: var(--sidebar-width);
+      }
+      
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: var(--sidebar-width);
+        background-color: var(--dark-color);
+        transition: width var(--transition-speed);
+        overflow-x: hidden;
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+      
+      .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+      }
+      
+      .sidebar-header {
+        padding: 20px;
+        color: white;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      
+      .sidebar.collapsed .sidebar-header h1 {
+        display: none;
+      }
+      
+      .sidebar-menu {
+        padding: 20px 0;
+      }
+      
+      .menu-item {
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        color: white;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+      }
+      
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      .menu-item i {
+        margin-right: 15px;
+        min-width: 20px;
+        text-align: center;
+      }
+      
+      .sidebar.collapsed .menu-text {
+        display: none;
+      }
+      
+      /* Main content */
+      .main-content {
+        padding: 20px;
+        transition: margin-left var(--transition-speed);
+      }
+      
+      body.collapsed-sidebar {
+        margin-left: var(--sidebar-collapsed-width);
+      }
+      
+      .navbar {
+        background-color: white;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        border-radius: 5px;
+      }
+      
+      .toggle-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--dark-color);
+        margin-right: 20px;
+      }
+      
+      /* Form styles */
+      .form-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+      
+      .form-title {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .form-group {
+        margin-bottom: 15px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+      }
+      
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+      
+      select.form-control {
+        height: 40px;
+      }
+      
+      textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+      }
+      
+      .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .form-col {
+        flex: 1;
+      }
+      
+      .btn {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      
+      .btn-primary:hover {
+        background-color: var(--secondary-color);
+      }
+      
+      .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+      }
+      
+      .btn-secondary:hover {
+        background-color: #5a6268;
+      }
+      
+      .btn-danger {
+        background-color: #dc3545;
+        color: white;
+      }
+      
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+      
+      /* Table */
+      .table-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      
+      .task-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .task-table th,
+      .task-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .task-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+      }
+      
+      .task-table tr:hover {
+        background-color: #f5f5f5;
+      }
+      
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      
+      .status-todo {
+        background-color: #ffecb3;
+      }
+      
+      .status-in-progress {
+        background-color: #bbdefb;
+      }
+      
+      .status-done {
+        background-color: #c8e6c9;
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 5px;
+      }
+      
+      .action-btn {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: white;
+        text-decoration: none;
+      }
+      
+      .edit-btn {
+        background-color: #4a6fa5;
+      }
+      
+      .delete-btn {
+        background-color: #dc3545;
+      }
+      
+      .view-btn {
+        background-color: #28a745;
+      }
+      
+      /* Pagination */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 5px;
+      }
+      
+      .pagination a {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: var(--primary-color);
+      }
+      
+      .pagination a.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+      }
+      
+      /* Responsiveness */
+      @media (max-width: 992px) {
+        .form-row {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        body {
+          margin-left: 0;
+        }
+      
+        .sidebar {
+          width: var(--sidebar-collapsed-width);
+          transform: translateX(-100%);
+        }
+      
+        .sidebar.collapsed {
+          transform: translateX(0);
+          width: var(--sidebar-width);
+        }
+      
+        .sidebar.collapsed .sidebar-header h1,
+        .sidebar.collapsed .menu-text {
+          display: block;
+        }
+      
+        body.collapsed-sidebar {
+          margin-left: 0;
+        }
+      
+        .toggle-btn {
+          position: fixed;
+          top: 15px;
+          left: 15px;
+          z-index: 1100;
+          background-color: white;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+      
+        .table-responsive {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1>Tasky</h1>
+      </div>
+      <div class="sidebar-menu">
+        <a href="#" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span class="menu-text">Dashboard</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-tasks"></i>
+          <span class="menu-text">Tarefas</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-calendar"></i>
+          <span class="menu-text">Calendário</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-chart-bar"></i>
+          <span class="menu-text">Relatórios</span>
+        </a>
+        <a href="#" class="menu-item">
+          <i class="fas fa-cog"></i>
+          <span class="menu-text">Configurações</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="navbar">
+        <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+        <h2>Gerenciamento de Tarefas</h2>
+      </div>
+
+      <!-- Lista de Tarefas -->
+      {% if task_list %}
+        <div class="form-container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="form-title">Lista de Tarefas</h3>
+            <a href="{% url 'task_create' %}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Tarefa</a>
+          </div>
+
+          <div class="table-responsive">
+            <table class="task-table">
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Status</th>
+                  <th>Responsável</th>
+                  <th>Data Início</th>
+                  <th>Previsão Término</th>
+                  <th>Quadro</th>
+                  <th>Prioridade</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for task in tasks %}
+                  <tr>
+                    <td>{{ task.title }}</td>
+                    <td>
+                      <span class="status-badge 
+                    {% if task.status == 'todo' %}
+                          status-todo
+
+                        {% elif task.status == 'in_progress' %}
+                          status-in-progress
+
+                        {% else %}
+                          status-done
+                        {% endif %}">
+                        {{ task.get_status_display }}
+                      </span>
+                    </td>
+                    <td>{{ task.assigned_to.username|default:'Não atribuído' }}</td>
+                    <td>{{ task.start_date|date:'d/m/Y' }}</td>
+                    <td>{{ task.estimated_end_date|date:'d/m/Y' }}</td>
+                    <td>{{ task.board.title }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <a href="{% url 'task_detail' task.id %}" class="action-btn view-btn"><i class="fas fa-eye"></i></a>
+                        <a href="{% url 'task_update' task.id %}" class="action-btn edit-btn"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'task_delete' task.id %}" class="action-btn delete-btn"><i class="fas fa-trash"></i></a>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginação -->
+          {% if is_paginated %}
+            <div class="pagination">
+              {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; Primeira</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                  <a class="active">{{ num }}</a>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                  <a href="?page={{ num }}">{{ num }}</a>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Última &raquo;</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Formulário de Criação/Edição de Tarefa -->
+      {% if form %}
+        <div class="form-container">
+          <h3 class="form-title">
+            {% if task.id %}
+              Editar Tarefa
+            {% else %}
+              Nova Tarefa
+            {% endif %}
+          </h3>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Campos básicos -->
+            <div class="form-group">
+              <label for="id_title">Título</label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="error">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label for="id_description">Descrição</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="error">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_status">Status</label>
+                  {{ form.status }}
+                  {% if form.status.errors %}
+                    <div class="error">{{ form.status.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_board">Quadro</label>
+                  {{ form.board }}
+                  {% if form.board.errors %}
+                    <div class="error">{{ form.board.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_priority">Prioridade</label>
+                  {{ form.priority }}
+                  {% if form.priority.errors %}
+                    <div class="error">{{ form.priority.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Datas e tempos -->
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_start_date">Data de Início</label>
+                  {{ form.start_date }}
+                  {% if form.start_date.errors %}
+                    <div class="error">{{ form.start_date.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_estimated_end_date">Previsão de Término</label>
+                  {{ form.estimated_end_date }}
+                  {% if form.estimated_end_date.errors %}
+                    <div class="error">{{ form.estimated_end_date.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_actual_end_date">Data de Término Real</label>
+                  {{ form.actual_end_date }}
+                  {% if form.actual_end_date.errors %}
+                    <div class="error">{{ form.actual_end_date.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_estimated_hours">Tempo Estimado (horas)</label>
+                  {{ form.estimated_hours }}
+                  {% if form.estimated_hours.errors %}
+                    <div class="error">{{ form.estimated_hours.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_actual_hours">Tempo Gasto (horas)</label>
+                  {{ form.actual_hours }}
+                  {% if form.actual_hours.errors %}
+                    <div class="error">{{ form.actual_hours.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Atribuições -->
+            <div class="form-row">
+              <div class="form-col">
+                <div class="form-group">
+                  <label for="id_assigned_to">Responsável</label>
+                  {{ form.assigned_to }}
+                  {% if form.assigned_to.errors %}
+                    <div class="error">{{ form.assigned_to.errors }}</div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <button type="submit" class="btn btn-primary">
+                {% if task.id %}
+                  Atualizar
+                {% else %}
+                  Criar
+                {% endif %}Tarefa
+              </button>
+              <a href="{% url 'task_list' %}" class="btn btn-secondary">Cancelar</a>
+              {% if task.id %}
+                <a href="{% url 'task_delete' task.id %}" class="btn btn-danger">Excluir</a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+      {% endif %}
+
+      <!-- Visualização de Tarefa -->
+      {% if task_detail %}
+        <div class="form-container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 class="form-title">Detalhes da Tarefa</h3>
+            <div>
+              <a href="{% url 'task_update' task_detail.id %}" class="btn btn-primary"><i class="fas fa-edit"></i> Editar</a>
+              <a href="{% url 'task_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Voltar</a>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <h4>Informações Básicas</h4>
+              <p>
+                <strong>Título:</strong> {{ task_detail.title }}
+              </p>
+              <p>
+                <strong>Status:</strong>
+                <span class="status-badge 
+                {% if task_detail.status == 'todo' %}
+                    status-todo
+
+                  {% elif task_detail.status == 'in_progress' %}
+                    status-in-progress
+
+                  {% else %}
+                    status-done
+                  {% endif %}">
+                  {{ task_detail.get_status_display }}
+                </span>
+              </p>
+              <p>
+                <strong>Descrição:</strong> {{ task_detail.description|default:'Sem descrição' }}
+              </p>
+              <p>
+                <strong>Quadro:</strong> {{ task_detail.board.title }}
+              </p>
+              <p>
+                <strong>Prioridade:</strong> {{ task_detail.priority }}
+              </p>
+            </div>
+
+            <div class="form-col">
+              <h4>Datas e Tempos</h4>
+              <p>
+                <strong>Data de Início:</strong> {{ task_detail.start_date|date:'d/m/Y' }}
+              </p>
+              <p>
+                <strong>Previsão de Término:</strong> {{ task_detail.estimated_end_date|date:'d/m/Y' }}
+              </p>
+              <p>
+                <strong>Data de Término Real:</strong> {{ task_detail.actual_end_date|date:'d/m/Y'|default:'Não finalizada' }}
+              </p>
+              <p>
+                <strong>Tempo Estimado:</strong> {{ task_detail.estimated_hours }} horas
+              </p>
+              <p>
+                <strong>Tempo Gasto:</strong> {{ task_detail.actual_hours }} horas
+              </p>
+              <p>
+                <strong>Progresso:</strong> {{ task_detail.progress_percentage }}%
+              </p>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <h4>Atribuições</h4>
+              <p>
+                <strong>Responsável:</strong> {{ task_detail.assigned_to.username|default:'Não atribuído' }}
+              </p>
+              <p>
+                <strong>Criado por:</strong> {{ task_detail.created_by.username }}
+              </p>
+              <p>
+                <strong>Criado em:</strong> {{ task_detail.created_at|date:'d/m/Y H:i' }}
+              </p>
+              <p>
+                <strong>Atualizado em:</strong> {{ task_detail.updated_at|date:'d/m/Y H:i' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Subtarefas -->
+          <h4 style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">Subtarefas</h4>
+          {% if task_detail.subtasks.all %}
+            <div class="table-responsive">
+              <table class="task-table">
+                <thead>
+                  <tr>
+                    <th>Título</th>
+                    <th>Status</th>
+                    <th>Responsável</th>
+                    <th>Tempo Estimado</th>
+                    <th>Tempo Gasto</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for subtask in task_detail.subtasks.all %}
+                    <tr>
+                      <td>{{ subtask.title }}</td>
+                      <td>
+                        <span class="status-badge 
+                      {% if subtask.status == 'todo' %}
+                            status-todo
+
+                          {% elif subtask.status == 'in_progress' %}
+                            status-in-progress
+
+                          {% else %}
+                            status-done
+                          {% endif %}">
+                          {{ subtask.get_status_display }}
+                        </span>
+                      </td>
+                      <td>{{ subtask.assigned_to.username|default:'Não atribuído' }}</td>
+                      <td>{{ subtask.estimated_hours|default:'--' }}</td>
+                      <td>{{ subtask.actual_hours }}</td>
+                      <td>
+                        <div class="action-buttons">
+                          <a href="{% url 'subtask_update' subtask.id %}" class="action-btn edit-btn"><i class="fas fa-edit"></i></a>
+                          <a href="{% url 'subtask_delete' subtask.id %}" class="action-btn delete-btn"><i class="fas fa-trash"></i></a>
+                        </div>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p>Nenhuma subtarefa cadastrada</p>
+          {% endif %}
+
+          <div style="margin-top: 15px;">
+            <a href="{% url 'subtask_create' %}?task={{ task_detail.id }}" class="btn btn-primary"><i class="fas fa-plus"></i> Nova Subtarefa</a>
+          </div>
+
+          <!-- Comentários -->
+          <h4 style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">Comentários</h4>
+          {% if task_detail.comments.all %}
+            {% for comment in task_detail.comments.all %}
+              <div style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <strong>{{ comment.author.username }}</strong>
+                  <small>{{ comment.created_at|date:'d/m/Y H:i' }}</small>
+                </div>
+                <p>{{ comment.content }}</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>Nenhum comentário</p>
+          {% endif %}
+
+          <!-- Formulário de comentário -->
+          <form method="post" action="{% url 'task_comment' task_detail.id %}" style="margin-top: 15px;">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="id_content">Novo Comentário</label>
+              <textarea name="content" id="id_content" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Comentar</button>
+          </form>
+
+          <!-- Histórico -->
+          <h4 style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">Histórico</h4>
+          {% if task_detail.history.all %}
+            <div style="max-height: 300px; overflow-y: auto;">
+              {% for history in task_detail.history.all %}
+                <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+                  <small style="min-width: 150px;">{{ history.timestamp|date:'d/m/Y H:i' }}</small>
+                  <div>
+                    <strong>{{ history.action }}</strong> por {{ history.user.username }}
+                    {% if history.details %}
+                      <p style="margin: 5px 0 0 0; color: #666;">{{ history.details }}</p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p>Nenhum registro de histórico</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Confirmação de Exclusão -->
+      {% if delete_task %}
+        <div class="form-container">
+          <h3 class="form-title">Confirmar Exclusão</h3>
+          <p>Você tem certeza que deseja excluir a tarefa "{{ delete_task.title }}"?</p>
+          <p>Esta ação não pode ser desfeita.</p>
+
+          <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+              <a href="{% url 'task_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleBtn')
+        const sidebar = document.getElementById('sidebar')
+        const body = document.body
+      
+        toggleBtn.addEventListener('click', function () {
+          sidebar.classList.toggle('collapsed')
+          body.classList.toggle('collapsed-sidebar')
+        })
+      
+        // Ajusta o comportamento em telas pequenas
+        function checkScreenSize() {
+          if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed')
+            body.classList.remove('collapsed-sidebar')
+      
+            // Inverte o comportamento do botão em telas pequenas
+            toggleBtn.addEventListener('click', function () {
+              if (sidebar.classList.contains('collapsed')) {
+                sidebar.style.transform = 'translateX(0)'
+              } else {
+                sidebar.style.transform = 'translateX(-100%)'
+              }
+            })
+          } else {
+            sidebar.style.transform = 'translateX(0)'
+          }
+        }
+      
+        // Verifica o tamanho da tela ao carregar
+        checkScreenSize()
+      
+        // Verifica ao redimensionar
+        window.addEventListener('resize', checkScreenSize)
+      })
+    </script>
+  </body>
+</html>

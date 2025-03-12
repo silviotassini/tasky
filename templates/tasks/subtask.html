@@ -1,0 +1,269 @@
+{% extends 'partials/base.html' %}
+
+{% block title %}
+  Sub Tarefas
+{% endblock %}
+
+{% block content %}
+  <h3><center>Tarefa [{{ task.title }}]</center></h3>
+  <div class="cards-container">
+    <!-- Card 1: Tarefas a fazer -->
+    <div class="card">
+      <div class="card-header todo">
+        <span>A Fazer</span>
+        <span class="badge">{{ to_do_count|default:'0' }}</span>
+      </div>
+      <div class="card-body" id="todo-card">
+        {% if to_do_subtasks %}
+          {% for stask in to_do_subtasks %}
+            <div class="task">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>{{ stask.title }}</h4>
+                <button class="delete-button" onclick="deleteTask({{ stask.id }})" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+              <p>{{ stask.description }}</p>
+              <div class="task-meta">
+                <span>Prazo: {{ stask.estimated_end_date }}</span>
+                <span>{{ stask.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task" id="task-0">
+            <p>Nenhuma sub tarefa cadastrada</p>
+          </div>
+        {% endif %}
+        <button class="add-task-button" onclick="showTaskForm('todo-card')">+</button>
+      </div>
+    </div>
+
+    <!-- Card 2: Tarefas em Progresso -->
+    <div class="card">
+      <div class="card-header in-progress">
+        <span>Em Progresso</span>
+        <span class="badge">{{ in_progress_count|default:'2' }}</span>
+      </div>
+      <div class="card-body" id="progress-card">
+        {% if in_progress_tasks %}
+          {% for task in in_progress_tasks %}
+            <div class="task">
+              <h4>{{ task.title }}</h4>
+              <p>{{ task.description }}</p>
+              <div class="task-meta">
+                <span>Prazo: {{ task.deadline }}</span>
+                <span>{{ task.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task">
+            <p>Nenhuma tarefa em progresso</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Card 3: Tarefas Concluídas -->
+    <div class="card">
+      <div class="card-header done">
+        <span>Concluídas</span>
+        <span class="badge">{{ done_count|default:'2' }}</span>
+      </div>
+      <div class="card-body" id="done-card">
+        {% if done_tasks %}
+          {% for task in done_tasks %}
+            <div class="task">
+              <h4>{{ task.title }}</h4>
+              <p>{{ task.description }}</p>
+              <div class="task-meta">
+                <span>Concluído em: {{ task.completed_at }}</span>
+                <span>{{ task.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task">
+            <p>Nenhuma tarefa concluída</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para adicionar tarefa -->
+  <div id="task-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeTaskForm()">&times;</span>
+      <h2>Adicionar Nova sub Tarefa</h2>
+      <form id="new-task-form" method="POST" action="{% url 'save_task' %}">
+        {% csrf_token %}
+        <input type="hidden" id="destination-card" name="board_id" value="{{ board_id }}" />
+        <div class="form-group">
+          <label for="task-title">Título:</label>
+          <input type="text" id="task-title" name="title" required />
+        </div>
+        <div class="form-group">
+          <label for="task-description">Descrição:</label>
+          <textarea id="task-description" name="description" required></textarea>
+        </div>
+        <div class="form-group" style="display: flex; gap: 20px;">
+          <div>
+            <label for="task-deadline">Prazo:</label>
+            <input type="date" id="task-deadline" name="deadline" required />
+          </div>
+          <div>
+            <label for="task-estimatedhour">Horas Estimadas:</label>
+            <input type="number" id="task-estimated_hours" name="estimated_hours" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="task-assigned">Responsável:</label>
+          <select id="task-assigned" name="assigned_to" required>
+            {% for user in users %}
+              <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    .card-body {
+      position: relative;
+      min-height: 100px;
+    }
+    
+    .add-task-button {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #4caf50;
+      color: white;
+      font-size: 24px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    .add-task-button:hover {
+      background-color: #45a049;
+    }
+    
+    .task {
+      cursor: pointer;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+      position: relative;
+    }
+    
+    .close-button {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .form-group textarea {
+      height: 100px;
+    }
+    
+    form button {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    form button:hover {
+      background-color: #45a049;
+    }
+  </style>
+
+  <script>
+    // Funções para adicionar nova tarefa
+    function showTaskForm(cardId) {
+      document.getElementById('destination-card').value = cardId
+      document.getElementById('task-modal').style.display = 'block'
+    }
+    
+    function closeTaskForm() {
+      document.getElementById('task-modal').style.display = 'none'
+    }
+    
+    // Função para salvar a nova tarefa no backend (simulada)
+    function saveNewTask(taskId, cardId, title, description, deadline, assigned) {
+      console.log(`Nova tarefa criada: ${title}`)
+      // Aqui você adicionaria uma chamada AJAX para salvar a tarefa no backend
+    }
+    
+    // Fechar o modal se o usuário clicar fora dele
+    window.onclick = function (event) {
+      const modal = document.getElementById('task-modal')
+      if (event.target === modal) {
+        closeTaskForm()
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function () {
+      // Obtém a data atual
+      const today = new Date()
+    
+      // Formata a data no formato YYYY-MM-DD que é o formato aceito pelo input type="date"
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0') // O mês começa em 0
+      const day = String(today.getDate()).padStart(2, '0')
+    
+      const formattedDate = `${day}-${month}-${year}`
+    
+      // Define o valor do campo deadline como a data de hoje
+      document.getElementById('task-deadline').value = formattedDate
+    })
+  </script>
+{% endblock %}
