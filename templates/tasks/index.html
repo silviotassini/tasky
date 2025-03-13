@@ -100,10 +100,6 @@
       <h2>Adicionar Nova Tarefa</h2>
       <form id="new-task-form" method="POST" action="{% url 'save_task' %}">
         {% csrf_token %}
-<<<<<<< HEAD
-        <input type="hidden" id="destination-card" name="board_id" value="{{ board_id }}" />
-=======
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         <div class="form-group">
           <label for="task-title">Título:</label>
           <input type="text" id="task-title" name="title" required />

@@ -1,11 +1,8 @@
 {% extends 'partials/base.html' %}
-<<<<<<< HEAD
-=======
 {% load static %}
 {% block stylesheets %}
   <link rel="stylesheet" href="{% static 'css/index.css' %}" />
 {% endblock %}
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
 
 {% block title %}
   Sub Tarefas
@@ -26,11 +23,7 @@
             <div class="task">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4>{{ stask.title }}</h4>
-<<<<<<< HEAD
-                <button class="delete-button" onclick="deleteTask({{ stask.id }})" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
-=======
                 <button class="delete-button" onclick="event.stopPropagation(); deleteTask({{ stask.id }}, '{% url 'rm_subtask' stask.id %}', this)" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
               </div>
               <p>{{ stask.description }}</p>
               <div class="task-meta">
@@ -106,15 +99,9 @@
     <div class="modal-content">
       <span class="close-button" onclick="closeTaskForm()">&times;</span>
       <h2>Adicionar Nova sub Tarefa</h2>
-<<<<<<< HEAD
-      <form id="new-task-form" method="POST" action="{% url 'save_task' %}">
-        {% csrf_token %}
-        <input type="hidden" id="destination-card" name="board_id" value="{{ board_id }}" />
-=======
       <form id="new-task-form" method="POST" action="{% url 'save-subtask' %}">
         {% csrf_token %}
         <input type="hidden" id="task_id" name="task_id" value="{{ task.id }}" />
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         <div class="form-group">
           <label for="task-title">Título:</label>
           <input type="text" id="task-title" name="title" required />
@@ -133,159 +120,10 @@
             <input type="number" id="task-estimated_hours" name="estimated_hours" required />
           </div>
         </div>
-<<<<<<< HEAD
-        <div class="form-group">
-          <label for="task-assigned">Responsável:</label>
-          <select id="task-assigned" name="assigned_to" required>
-            {% for user in users %}
-              <option value="{{ user.id }}">{{ user.username }}</option>
-            {% endfor %}
-          </select>
-        </div>
-=======
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
-<<<<<<< HEAD
-
-  <style>
-    .card-body {
-      position: relative;
-      min-height: 100px;
-    }
-    
-    .add-task-button {
-      position: absolute;
-      right: 10px;
-      bottom: 10px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: #4caf50;
-      color: white;
-      font-size: 24px;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-    
-    .add-task-button:hover {
-      background-color: #45a049;
-    }
-    
-    .task {
-      cursor: pointer;
-    }
-    
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    
-    .modal-content {
-      background-color: white;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 5px;
-      width: 80%;
-      max-width: 500px;
-      position: relative;
-    }
-    
-    .close-button {
-      position: absolute;
-      right: 15px;
-      top: 10px;
-      font-size: 24px;
-      cursor: pointer;
-    }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-    
-    .form-group textarea {
-      height: 100px;
-    }
-    
-    form button {
-      padding: 10px 15px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    
-    form button:hover {
-      background-color: #45a049;
-    }
-  </style>
-
-  <script>
-    // Funções para adicionar nova tarefa
-    function showTaskForm(cardId) {
-      document.getElementById('destination-card').value = cardId
-      document.getElementById('task-modal').style.display = 'block'
-    }
-    
-    function closeTaskForm() {
-      document.getElementById('task-modal').style.display = 'none'
-    }
-    
-    // Função para salvar a nova tarefa no backend (simulada)
-    function saveNewTask(taskId, cardId, title, description, deadline, assigned) {
-      console.log(`Nova tarefa criada: ${title}`)
-      // Aqui você adicionaria uma chamada AJAX para salvar a tarefa no backend
-    }
-    
-    // Fechar o modal se o usuário clicar fora dele
-    window.onclick = function (event) {
-      const modal = document.getElementById('task-modal')
-      if (event.target === modal) {
-        closeTaskForm()
-      }
-    }
-    
-    document.addEventListener('DOMContentLoaded', function () {
-      // Obtém a data atual
-      const today = new Date()
-    
-      // Formata a data no formato YYYY-MM-DD que é o formato aceito pelo input type="date"
-      const year = today.getFullYear()
-      const month = String(today.getMonth() + 1).padStart(2, '0') // O mês começa em 0
-      const day = String(today.getDate()).padStart(2, '0')
-    
-      const formattedDate = `${day}-${month}-${year}`
-    
-      // Define o valor do campo deadline como a data de hoje
-      document.getElementById('task-deadline').value = formattedDate
-=======
 {% endblock %}
 
 {% block scripts %}
@@ -305,7 +143,6 @@
         alert('Você pressionou a tecla Insert')
         // Adicione sua lógica aqui
       }
->>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
     })
   </script>
 {% endblock %}
