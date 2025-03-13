@@ -1,0 +1,154 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+{% endblock %}
+
+{% block title %}
+  Dashboard de Tarefas
+{% endblock %}
+
+{% block content %}
+  <div class="cards-container">
+    <!-- Card 1: Tarefas a fazer -->
+    <div class="card">
+      <div class="card-header todo">
+        <span>A Fazer</span>
+        <span class="badge">{{ to_do_count|default:'3' }}</span>
+      </div>
+      <div class="card-body" id="todo-card">
+        {% if to_do_tasks %}
+          {% for task in to_do_tasks %}
+            <div class="task" onclick="window.location.href='{% url 'subtasks_view' task.id %}'">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4>{{ task.title }}</h4>
+                <button class="delete-button" onclick="event.stopPropagation(); deleteTask({{ task.id }}, '{% url 'rm_task' task.id %}', this)" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
+              </div>
+              <p>{{ task.description }}</p>
+              <div class="task-meta">
+                <span>Prazo: {{ task.estimated_end_date }}</span>
+                <span>{{ task.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task" id="task-0">
+            <p>Nenhuma tarefa cadastrada</p>
+          </div>
+        {% endif %}
+        <button class="add-task-button" onclick="showTaskForm('todo-card')">+</button>
+      </div>
+    </div>
+
+    <!-- Card 2: Tarefas em Progresso -->
+    <div class="card">
+      <div class="card-header in-progress">
+        <span>Em Progresso</span>
+        <span class="badge">{{ in_progress_count|default:'2' }}</span>
+      </div>
+      <div class="card-body" id="progress-card">
+        {% if in_progress_tasks %}
+          {% for task in in_progress_tasks %}
+            <div class="task">
+              <h4>{{ task.title }}</h4>
+              <p>{{ task.description }}</p>
+              <div class="task-meta">
+                <span>Prazo: {{ task.deadline }}</span>
+                <span>{{ task.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task">
+            <p>Nenhuma tarefa em progresso</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Card 3: Tarefas Concluídas -->
+    <div class="card">
+      <div class="card-header done">
+        <span>Concluídas</span>
+        <span class="badge">{{ done_count|default:'2' }}</span>
+      </div>
+      <div class="card-body" id="done-card">
+        {% if done_tasks %}
+          {% for task in done_tasks %}
+            <div class="task">
+              <h4>{{ task.title }}</h4>
+              <p>{{ task.description }}</p>
+              <div class="task-meta">
+                <span>Concluído em: {{ task.completed_at }}</span>
+                <span>{{ task.assigned_to }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="task">
+            <p>Nenhuma tarefa concluída</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para adicionar tarefa -->
+  <div id="task-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeTaskForm()">&times;</span>
+      <h2>Adicionar Nova Tarefa</h2>
+      <form id="new-task-form" method="POST" action="{% url 'save_task' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="task-title">Título:</label>
+          <input type="text" id="task-title" name="title" required />
+        </div>
+        <div class="form-group">
+          <label for="task-description">Descrição:</label>
+          <textarea id="task-description" name="description" required></textarea>
+        </div>
+        <div class="form-group" style="display: flex; gap: 20px;">
+          <div>
+            <label for="task-deadline">Prazo:</label>
+            <input type="date" id="task-deadline" name="deadline" required />
+          </div>
+          <div>
+            <label for="task-estimatedhour">Horas Estimadas:</label>
+            <input type="number" id="task-estimated_hours" name="estimated_hours" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="task-assigned">Responsável:</label>
+          <select id="task-assigned" name="assigned_to" required>
+            {% for user in users %}
+              <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/index.js' %}"></script>
+  <script>
+    document.addEventListener('keydown', function (event) {
+      // Verificar se a tecla '+' foi pressionada
+      if (event.key === '+') {
+        event.preventDefault() // Previne comportamentos padrão, se necessário
+        alert('Você pressionou a tecla +')
+        // Adicione sua lógica aqui, como enviar um formulário ou executar uma ação
+      }
+    
+      // Verificar se a tecla 'Insert' foi pressionada
+      if (event.key === 'Insert') {
+        event.preventDefault()
+        alert('Você pressionou a tecla Insert')
+        // Adicione sua lógica aqui
+      }
+    })
+  </script>
+{% endblock %}
