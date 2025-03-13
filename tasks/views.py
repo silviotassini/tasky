@@ -1,9 +1,14 @@
-
+from django.utils import timezone
+from datetime import date, timedelta
+import calendar
+from calendar import monthrange
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task, SubTask, TaskStatus
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.db.models import Q
+
 
 @login_required
 def index(request):
@@ -137,3 +142,78 @@ def savesubtask(request):
         )
 
     return redirect(f"/subtasks/{task.id}/")
+
+def calendar_view(request):
+    # Obtém o mês e ano da query string ou usa o mês atual
+    today = timezone.now().date()
+    year = int(request.GET.get('year', today.year))
+    month = int(request.GET.get('month', today.month))
+    
+    # Cria um objeto de calendário
+    cal = calendar.monthcalendar(year, month)
+    
+    # Obtém o primeiro e último dia do mês
+    try:
+        first_day = date(year, month, 1)
+        days_in_month = monthrange(year, month)[1]
+        last_day = date(year, month, days_in_month)
+    except ValueError:
+        # Garante que não haverá erro em caso de datas inválidas
+        first_day = today.replace(day=1)
+        last_day = first_day + timedelta(days=monthrange(first_day.year, first_day.month)[1] - 1)
+    
+    # Calcula o mês anterior e o próximo mês
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+    
+    # Lista de nomes dos meses em português
+    month_names = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ]
+    
+    # Obtém todas as tarefas do mês
+    start_date = first_day - timedelta(days=7)  # Uma semana antes
+    end_date = last_day + timedelta(days=7)     # Uma semana depois
+    
+    tasks = Task.objects.filter(
+        Q(start_date__lte=end_date) & Q(estimated_end_date__gte=start_date)
+    ).order_by('start_date', 'priority')
+    
+    # Organiza as tarefas por data
+    task_dict = {}
+    for task in tasks:
+        current_date = task.start_date
+        while current_date <= task.estimated_end_date:
+            if current_date not in task_dict:
+                task_dict[current_date] = []
+            task_dict[current_date].append(task)
+            current_date += timedelta(days=1)
+    
+    # Prepara os dados do calendário para o template
+    calendar_weeks = []
+    for week in cal:
+        week_data = []
+        for day in week:
+            if day == 0:  # Dias fora do mês
+                week_data.append((None, []))
+            else:
+                current_day = date(year, month, day)
+                week_data.append((current_day, task_dict.get(current_day, [])))
+        calendar_weeks.append(week_data)
+    
+    context = {
+        'calendar_weeks': calendar_weeks,
+        'month': month,
+        'year': year,
+        'month_name': month_names[month - 1],
+        'prev_month': prev_month,
+        'prev_year': prev_year,
+        'next_month': next_month,
+        'next_year': next_year,
+        'today': today,
+    }
+    
+    return render(request, 'tasks/calendar.html', context)

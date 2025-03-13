@@ -1,5 +1,5 @@
 from django.urls import path
-from tasks.views import index, savetask, savesubtask, subtasks_view, ajax_rm_task, ajax_rm_subtask
+from tasks.views import index, savetask, savesubtask, subtasks_view, ajax_rm_task, ajax_rm_subtask, calendar_view
 
 urlpatterns = [
     path('', index, name='index'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('subtasks/<int:task_id>/', subtasks_view, name='subtasks_view'),
     path('task/<int:task_id>/rm/', ajax_rm_task, name='rm_task'),
     path('subtask/<int:subtask_id>/rm/', ajax_rm_subtask, name='rm_subtask'),
+    path('calendar/', calendar_view, name='calendar'),
 ]
