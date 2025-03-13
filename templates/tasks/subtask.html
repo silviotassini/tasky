@@ -1,4 +1,11 @@
 {% extends 'partials/base.html' %}
+<<<<<<< HEAD
+=======
+{% load static %}
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/index.css' %}" />
+{% endblock %}
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
 
 {% block title %}
   Sub Tarefas
@@ -19,7 +26,11 @@
             <div class="task">
               <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4>{{ stask.title }}</h4>
+<<<<<<< HEAD
                 <button class="delete-button" onclick="deleteTask({{ stask.id }})" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
+=======
+                <button class="delete-button" onclick="event.stopPropagation(); deleteTask({{ stask.id }}, '{% url 'rm_subtask' stask.id %}', this)" style="background: none; border: none; cursor: pointer;"><i class="fa-regular fa-trash-can"></i></button>
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
               </div>
               <p>{{ stask.description }}</p>
               <div class="task-meta">
@@ -95,9 +106,15 @@
     <div class="modal-content">
       <span class="close-button" onclick="closeTaskForm()">&times;</span>
       <h2>Adicionar Nova sub Tarefa</h2>
+<<<<<<< HEAD
       <form id="new-task-form" method="POST" action="{% url 'save_task' %}">
         {% csrf_token %}
         <input type="hidden" id="destination-card" name="board_id" value="{{ board_id }}" />
+=======
+      <form id="new-task-form" method="POST" action="{% url 'save-subtask' %}">
+        {% csrf_token %}
+        <input type="hidden" id="task_id" name="task_id" value="{{ task.id }}" />
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         <div class="form-group">
           <label for="task-title">Título:</label>
           <input type="text" id="task-title" name="title" required />
@@ -116,6 +133,7 @@
             <input type="number" id="task-estimated_hours" name="estimated_hours" required />
           </div>
         </div>
+<<<<<<< HEAD
         <div class="form-group">
           <label for="task-assigned">Responsável:</label>
           <select id="task-assigned" name="assigned_to" required>
@@ -124,10 +142,13 @@
             {% endfor %}
           </select>
         </div>
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
+<<<<<<< HEAD
 
   <style>
     .card-body {
@@ -264,6 +285,27 @@
     
       // Define o valor do campo deadline como a data de hoje
       document.getElementById('task-deadline').value = formattedDate
+=======
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'js/index.js' %}"></script>
+  <script>
+    document.addEventListener('keydown', function (event) {
+      // Verificar se a tecla '+' foi pressionada
+      if (event.key === '+') {
+        event.preventDefault() // Previne comportamentos padrão, se necessário
+        alert('Você pressionou a tecla +')
+        // Adicione sua lógica aqui, como enviar um formulário ou executar uma ação
+      }
+    
+      // Verificar se a tecla 'Insert' foi pressionada
+      if (event.key === 'Insert') {
+        event.preventDefault()
+        alert('Você pressionou a tecla Insert')
+        // Adicione sua lógica aqui
+      }
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
     })
   </script>
 {% endblock %}

@@ -156,7 +156,10 @@ function updateCardCounter(cardId, headerClass) {
 }
 // Funções para adicionar nova tarefa
 function showTaskForm(cardId) {
+<<<<<<< HEAD
     document.getElementById('destination-card').value = cardId
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
     document.getElementById('task-modal').style.display = 'block'
 }
 

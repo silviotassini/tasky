@@ -2,8 +2,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task, SubTask, TaskStatus
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 
 
+=======
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+@login_required
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
 def index(request):
     # Substitua isso por dados reais do seu modelo
     to_do_tasks = Task.objects.filter(status=TaskStatus.TO_DO)
@@ -22,6 +29,10 @@ def index(request):
 
     return render(request, 'tasks/index.html', context)
 
+<<<<<<< HEAD
+=======
+@login_required
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
 def subtasks_view(request, task_id):
     # Obter a tarefa correspondente ao ID
     task = get_object_or_404(Task, id=task_id)
@@ -57,14 +68,20 @@ def ajax_rm_task(request, task_id):
         task.delete()
         
         # Retorna resposta JSON
+<<<<<<< HEAD
         from django.http import JsonResponse
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         return JsonResponse({
             'success': True,
             'message': 'Tarefa apagada com sucesso.'
         })
     
     # Se não for uma requisição AJAX POST, retorna erro
+<<<<<<< HEAD
     from django.http import JsonResponse
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
     return JsonResponse({
         'success': False,
         'message': 'Método não permitido'
@@ -84,14 +101,20 @@ def ajax_rm_subtask(request, subtask_id):
         subtask.delete()
         
         # Retorna resposta JSON
+<<<<<<< HEAD
         from django.http import JsonResponse
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         return JsonResponse({
             'success': True,
             'message': 'Subtarefa apagada com sucesso.'
         })
     
     # Se não for uma requisição AJAX POST, retorna erro
+<<<<<<< HEAD
     from django.http import JsonResponse
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
     return JsonResponse({
         'success': False,
         'message': 'Método não permitido'
@@ -100,14 +123,21 @@ def ajax_rm_subtask(request, subtask_id):
 def savetask(request):
     if request.method == "POST":
         # Obtém os dados do formulário
+<<<<<<< HEAD
         print(request.POST)
+=======
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
         title = request.POST.get("title")
         description = request.POST.get("description")
         deadline = request.POST.get("deadline")
         assigned_to_id = request.POST.get("assigned_to")
         estimated_hours = request.POST.get("estimated_hours")
         # Cria a nova tarefa
+<<<<<<< HEAD
         task = Task.objects.create(
+=======
+        Task.objects.create(
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
             title=title,
             description=description,
             estimated_end_date=deadline,
@@ -115,6 +145,33 @@ def savetask(request):
             estimated_hours = estimated_hours,
             created_by=request.user
         )
+<<<<<<< HEAD
         # return redirect("dashboard")  # Redireciona para o dashboard ou outra página apropriada
 
     return redirect("index")
+=======
+
+    return redirect("index")
+
+def savesubtask(request):
+    if request.method == "POST":
+        task = get_object_or_404(Task, id=request.POST.get("task_id"))
+        # Obtém os dados do formulário
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        deadline = request.POST.get("deadline")
+        assigned_to_id = task.assigned_to.pk
+        estimated_hours = request.POST.get("estimated_hours")
+        # Cria a nova tarefa        
+
+        SubTask.objects.create(
+            title=title,
+            description=description,
+            estimated_end_date=deadline,
+            assigned_to_id=assigned_to_id,
+            estimated_hours = estimated_hours,
+            parent_task = task
+        )
+
+    return redirect(f"/subtasks/{task.id}/")
+>>>>>>> ae7b4020dca5f57d49b1ec01f8a8036af73594f6
