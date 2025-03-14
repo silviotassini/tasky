@@ -1,8 +1,21 @@
 :root {
-    --primary-color: #4a6fa5;
-    --secondary-color: #166088;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+    --color1: #ececec;
+    /* Cinza claro */
+    --color2: #a7ebc9;
+    /* Verde claro */
+    --color3: #78b395;
+    /* Verde médio */
+    --color4: #917c67;
+    /* Marrom claro */
+    --color5: #5e5953;
+    /* Cinza escuro */
+    --color6: #ebe7a7;
+    /* Cinza escuro */
+
+    --primary-color: var(--color3);
+    --secondary-color: #69a183;
+    --light-color: var(--color1);
+    --dark-color: var(--color5);
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
     --transition-speed: 0.3s;
@@ -16,8 +29,10 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
+    background-color: var(--light-color);
+    /* Usando amarelo claro como fundo */
+    color: var(--dark-color);
+    /* Usando cinza escuro como cor do texto */
     transition: margin-left var(--transition-speed);
     margin-left: var(--sidebar-width);
 }
@@ -136,14 +151,17 @@ body.collapsed-sidebar {
 
 .card-header.todo {
     background-color: #ffecb3;
+    /* Mantido, pois combina com amarelo claro */
 }
 
 .card-header.in-progress {
     background-color: #bbdefb;
+    /* Mantido, pois combina com verde claro */
 }
 
 .card-header.done {
     background-color: #c8e6c9;
+    /* Mantido, pois combina com verde claro */
 }
 
 .card-body {
@@ -152,6 +170,7 @@ body.collapsed-sidebar {
 
 .task {
     background-color: #f8f9fa;
+    /* Mantido, pois combina com amarelo claro */
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 10px;

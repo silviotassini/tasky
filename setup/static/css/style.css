@@ -1,11 +1,26 @@
 :root {
-    --primary-color: #4a6fa5;
-    --secondary-color: #166088;
-    --light-color: #f8f9fa;
-    --dark-color: #343a40;
+    --color1: #ececec;
+    /* Cinza claro */
+    --color2: #a7ebc9;
+    /* Verde claro */
+    --color3: #78b395;
+    /* Verde médio */
+    --color4: #917c67;
+    /* Marrom claro */
+    --color5: #5b5b5b;
+    /* Cinza escuro */
+    --color6: #ebe7a7;
+    /* Cinza escuro */
+    --color7: #f55a5a;
+
+    --primary-color: var(--color3);
+    --secondary-color: var(--color4);
+    --light-color: var(--color1);
+    --dark-color: var(--color5);
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
     --transition-speed: 0.3s;
+    --button-danger: var(var(--color7))
 }
 
 * {
@@ -16,8 +31,8 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
+    background-color: var(--light-color);
+    color: var(--dark-color);
     transition: margin-left var(--transition-speed);
     margin-left: var(--sidebar-width);
 }
@@ -135,15 +150,15 @@ body.collapsed-sidebar {
 }
 
 .card-header.todo {
-    background-color: #ffecb3;
+    background-color: var(--color6);
 }
 
 .card-header.in-progress {
-    background-color: #bbdefb;
+    background-color: var(--color2);
 }
 
 .card-header.done {
-    background-color: #c8e6c9;
+    background-color: var(--color4);
 }
 
 .card-body {
@@ -156,6 +171,7 @@ body.collapsed-sidebar {
     border-radius: 5px;
     margin-bottom: 10px;
     border-left: 4px solid var(--primary-color);
+    cursor: pointer;
 }
 
 .task:last-child {
@@ -179,6 +195,53 @@ body.collapsed-sidebar {
     align-items: center;
     font-size: 12px;
     color: #888;
+}
+
+/* Botão de adicionar tarefa */
+.add-task-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--primary-button-color);
+    color: white;
+    font-size: 24px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.add-task-button:hover {
+    background-color: var(--primary-button-hover-color);
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 2px;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: var(--primary-color);
+}
+
+.btn-view {
+    background-color: var(--primary-color);
+}
+
+.btn-delete {
+    background-color: var(--color7);
+}
+
+.btn-add {
+    background-color: var(--primary-color);
 }
 
 /* Responsividade */

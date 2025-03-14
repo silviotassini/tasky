@@ -1,6 +1,8 @@
 {% extends 'partials/base.html' %}
 {% load static %}
-
+{% block stylesheets %}
+  <link rel="stylesheet" href="{% static 'css/list.css' %}" />
+{% endblock %}
 {% block title %}
   Detalhes da Tarefa - {{ task.title }}
 {% endblock %}
@@ -44,13 +46,13 @@
     </div>
 
     <div class="action-buttons">
-      <button class="btn btn-edit" id="editTaskBtn">Editar Tarefa</button>
-      <a href="{% url 'task_list' %}" class="btn">Voltar à Lista</a>
+      <button class="btn" id="editTaskBtn">Editar</button>
+      <button class="btn" onclick="location.href='{% url 'task_list' %}'">Voltar</button>
     </div>
 
     <div class="subtask-list">
       <h2>Subtarefas</h2>
-      <button class="btn btn-add" id="addSubtaskBtn">Adicionar Subtarefa</button>
+      <button class="btn" id="addSubtaskBtn">Adicionar Subtarefa</button>
 
       <table>
         <thead>
@@ -76,10 +78,10 @@
                 {% endif %}
               </td>
               <td>
-                <button class="btn btn-edit btn-small editSubtaskBtn" data-id="{{ subtask.id }}">Editar</button>
+                <button class="btn btn-edit editSubtaskBtn" data-id="{{ subtask.id }}">Editar</button>
                 <form method="post" action="{% url 'delete_subtask' subtask.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta subtarefa?');">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-delete btn-small">Excluir</button>
+                  <button type="submit" class="btn btn-delete"><i class="fa-regular fa-trash-can"></i></button>
                 </form>
               </td>
             </tr>
@@ -189,148 +191,6 @@
       </form>
     </div>
   </div>
-
-  {% block extra_css %}
-    <style>
-      .container {
-        max-width: 900px;
-        margin: 0 auto;
-        background-color: #fff;
-        padding: 0px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      h1,
-      h2 {
-        color: #333;
-      }
-      .task-details {
-        margin-bottom: 20px;
-        padding: 15px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-      }
-      .task-property {
-        margin-bottom: 10px;
-      }
-      .task-property strong {
-        display: inline-block;
-        width: 120px;
-      }
-      .subtask-list {
-        margin-top: 20px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th,
-      td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #ddd;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-      tr:hover {
-        background-color: #f5f5f5;
-      }
-      .btn {
-        display: inline-block;
-        padding: 8px 12px;
-        margin: 5px;
-        background-color: #4caf50;
-        color: white;
-        text-decoration: none;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-      }
-      .btn-edit {
-        background-color: #2196f3;
-      }
-      .btn-delete {
-        background-color: #f44336;
-      }
-      .btn-add {
-        background-color: #4caf50;
-      }
-      .action-buttons {
-        margin: 20px 0;
-      }
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4);
-      }
-      .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 60%;
-        border-radius: 5px;
-      }
-      .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-      }
-      .close:hover,
-      .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
-      form {
-        margin-top: 15px;
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      label {
-        display: block;
-        margin-bottom: 5px;
-      }
-      input[type='text'],
-      input[type='date'],
-      textarea,
-      select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
-      }
-      textarea {
-        height: 100px;
-      }
-      .messages {
-        margin-bottom: 20px;
-      }
-      .alert {
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-      }
-      .alert-success {
-        background-color: #dff0d8;
-        color: #3c763d;
-      }
-      .alert-error {
-        background-color: #f2dede;
-        color: #a94442;
-      }
-    </style>
-  {% endblock %}
 
   {% block extra_js %}
     <script>

@@ -1,34 +1,51 @@
+/* Definição das variáveis de cores */
+:root {
+  --color1: #ebe7a7;
+  /* Amarelo claro */
+  --color2: #a7ebc9;
+  /* Verde claro */
+  --color3: #78b395;
+  /* Verde médio */
+  --color4: #917c67;
+  /* Marrom claro */
+  --color5: #5e5953;
+  /* Cinza escuro */
+  --color6: #ececec;
+  /* Cinza claro */
+
+  --primary-light-color: var(--color1);
+  /* Usando cinza claro como primário */
+  /* Cores para elementos específicos */
+  --primary-button-color: var(--color3);
+  /* Verde médio para botões principais */
+  --primary-button-hover-color: #69a183;
+  /* Versão mais escura do verde médio para hover */
+  --background-color: var(--color6);
+  /* Amarelo claro para fundo geral */
+  --card-background-color: white;
+  /* Branco para cards */
+  --modal-background-color: white;
+  /* Branco para modais */
+  --text-color: var(--color5);
+  /* Cinza escuro para texto geral */
+  --border-color: #ddd;
+  /* Cinza claro para bordas */
+  --menu-background-color: var(--color2);
+  /* Verde claro para menus */
+
+}
+
+/* Card */
 .card-body {
   position: relative;
   min-height: 100px;
+  background-color: var(--card-background-color);
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.add-task-button {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #4caf50;
-  color: white;
-  font-size: 24px;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.add-task-button:hover {
-  background-color: #45a049;
-}
-
-.task {
-  cursor: pointer;
-}
-
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -41,7 +58,7 @@
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--modal-background-color);
   margin: 10% auto;
   padding: 20px;
   border-radius: 5px;
@@ -50,14 +67,7 @@
   position: relative;
 }
 
-.close-button {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-  font-size: 24px;
-  cursor: pointer;
-}
-
+/* Formulário */
 .form-group {
   margin-bottom: 15px;
 }
@@ -72,23 +82,49 @@
 .form-group textarea {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  color: var(--text-color);
+  /* Adiciona cor do texto aos inputs e textareas */
 }
 
 .form-group textarea {
   height: 100px;
 }
 
-form button {
-  padding: 10px 15px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+/* Menu */
+.menu {
+  background-color: var(--menu-background-color);
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-form button:hover {
-  background-color: #45a049;
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+}
+
+.menu li {
+  margin-right: 20px;
+}
+
+.menu a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: bold;
+}
+
+.menu a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-color);
 }
