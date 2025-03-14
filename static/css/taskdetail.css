@@ -1,0 +1,84 @@
+.task-details {
+    background: #f9fafb;
+    /* Cor de fundo suave */
+    border: 1px solid #e5e7eb;
+    /* Borda clara */
+    border-radius: 12px;
+    /* Bordas arredondadas */
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Sombra leve */
+    max-width: 600px;
+    margin: 20px auto;
+    /* Centralizado na página */
+    font-family: 'Arial', sans-serif;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.task-header h2 {
+    font-size: 1.5rem;
+    color: #111827;
+    /* Texto escuro */
+    margin: 0;
+}
+
+.task-status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.task-status.to_do {
+    background: #ffedd5;
+    /* Cor suave para 'A Fazer' */
+    color: #d97706;
+}
+
+.task-status.in_progress {
+    background: #d1fae5;
+    /* Cor suave para 'Em Progresso' */
+    color: #047857;
+}
+
+.task-status.done {
+    background: #e0e7ff;
+    /* Cor suave para 'Concluído' */
+    color: #3730a3;
+}
+
+.task-body .task-property {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.task-property strong {
+    color: #374151;
+    /* Cinza escuro */
+    font-weight: bold;
+}
+
+.task-property span,
+.task-property p {
+    color: #6b7280;
+    /* Texto cinza médio */
+    margin-left: 5px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}

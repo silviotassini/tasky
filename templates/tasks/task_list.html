@@ -1,0 +1,172 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}
+  Lista de Tarefas
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="action-buttons">
+      <a href="#" class="btn btn-add">Nova Tarefa</a>
+    </div>
+
+    <div class="task-list">
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Data Limite</th>
+            <th>Responsável</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+            <tr>
+              <td>{{ task.title }}</td>
+              <td>{{ task.status }}</td>
+              <td>{{ task.priority }}</td>
+              <td>
+                {% if task.due_date %}
+                  {{ task.due_date|date:'d/m/Y' }}
+                {% else %}
+                  Não definida
+                {% endif %}
+              </td>
+              <td>{{ task.assigned_to|default:'Não atribuído' }}</td>
+              <td>
+                <a href="{% url 'task_detail' task.id %}" class="btn btn-view btn-small">Visualizar</a>
+                <form method="post" action="" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta tarefa?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-delete btn-small">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" style="text-align: center;">Nenhuma tarefa encontrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% block extra_css %}
+    <style>
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 5px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-small {
+        padding: 5px 8px;
+        font-size: 0.85em;
+      }
+      .btn-view {
+        background-color: #2196f3;
+      }
+      .btn-delete {
+        background-color: #f44336;
+      }
+      .btn-add {
+        background-color: #4caf50;
+      }
+      .action-buttons {
+        margin: 20px 0;
+      }
+      .messages {
+        margin-bottom: 20px;
+      }
+      .alert {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+      .alert-success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .alert-error {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+      nav {
+        background-color: #333;
+        color: white;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+      }
+      .nav-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .brand {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+      }
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 15px;
+      }
+      footer {
+        text-align: center;
+        padding: 20px;
+        margin-top: 30px;
+        color: #666;
+        font-size: 0.9em;
+      }
+    </style>
+  {% endblock %}
+{% endblock %}

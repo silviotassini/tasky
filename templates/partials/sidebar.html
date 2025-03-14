@@ -1,13 +1,13 @@
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h1>Tasky</h1>
+    <h1 class="menu-item">Tasky</h1>
   </div>
   <div class="sidebar-menu">
     <a href="{% url 'index' %}" class="menu-item">
       <i class="fas fa-home"></i>
       <span class="menu-text">Dashboard</span>
     </a>
-    <a href="#" class="menu-item">
+    <a href="{% url 'task_list' %}" class="menu-item">
       <i class="fas fa-tasks"></i>
       <span class="menu-text">Tarefas</span>
     </a>

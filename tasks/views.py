@@ -3,12 +3,14 @@ from datetime import date, timedelta
 import calendar
 from calendar import monthrange
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from tasks.forms.forms import SubTaskForm, TaskForm
 from .models import Task, SubTask, TaskStatus
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db.models import Q
-
+from django.views.decorators.http import require_POST
 
 @login_required
 def index(request):
@@ -217,3 +219,113 @@ def calendar_view(request):
     }
     
     return render(request, 'tasks/calendar.html', context)
+
+def task_detail(request, task_id):
+    """
+    View que exibe os detalhes de uma tarefa específica e suas subtarefas.
+    """
+    # Busca a tarefa no banco de dados
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Busca todas as subtarefas relacionadas
+    subtasks = task.subtasks.all()
+    
+    # Formulários para edição e criação
+    task_form = TaskForm(instance=task)
+    subtask_form = SubTaskForm()
+    
+    context = {
+        'task': task,
+        'subtasks': subtasks,
+        'task_form': task_form,
+        'subtask_form': subtask_form,
+    }
+    
+    return render(request, 'tasks/task_detail.html', context)
+
+@require_POST
+def update_task(request, task_id):
+    """
+    View para processar a atualização de uma tarefa existente.
+    """
+    task = get_object_or_404(Task, id=task_id)
+    form = TaskForm(request.POST, instance=task)
+    
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Tarefa atualizada com sucesso!')
+    else:
+        messages.error(request, 'Erro ao atualizar tarefa. Verifique os dados informados.')
+    
+    return redirect('task_detail', task_id=task_id)
+
+@require_POST
+def add_subtask(request, task_id):
+    """
+    View para adicionar uma nova subtarefa a uma tarefa existente.
+    """
+    task = get_object_or_404(Task, id=task_id)
+    form = SubTaskForm(request.POST)
+    
+    if form.is_valid():
+        subtask = form.save(commit=False)
+        subtask.task = task
+        subtask.save()
+        messages.success(request, 'Subtarefa adicionada com sucesso!')
+    else:
+        messages.error(request, 'Erro ao adicionar subtarefa. Verifique os dados informados.')
+    
+    return redirect('task_detail', task_id=task_id)
+
+@require_POST
+def update_subtask(request, subtask_id):
+    """
+    View para atualizar uma subtarefa existente.
+    """
+    subtask = get_object_or_404(SubTask, id=subtask_id)
+    task_id = subtask.task.id
+    form = SubtaskForm(request.POST, instance=subtask)
+    
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Subtarefa atualizada com sucesso!')
+    else:
+        messages.error(request, 'Erro ao atualizar subtarefa. Verifique os dados informados.')
+    
+    return redirect('task_detail', task_id=task_id)
+
+@require_POST
+def delete_subtask(request, subtask_id):
+    """
+    View para excluir uma subtarefa.
+    """
+    subtask = get_object_or_404(SubTask, id=subtask_id)
+    task_id = subtask.task.id
+    
+    subtask.delete()
+    messages.success(request, 'Subtarefa excluída com sucesso!')
+    
+    return redirect('task_detail', task_id=task_id)
+
+def task_list(request):
+    """
+    View para listar todas as tarefas.
+    """
+    tasks = Task.objects.all()
+    return render(request, 'tasks/task_list.html', {'tasks': tasks})
+
+def get_subtask_data(request, subtask_id):
+    """
+    View para obter os dados de uma subtarefa via AJAX.
+    """
+    subtask = get_object_or_404(SubTask, id=subtask_id)
+    
+    data = {
+        'id': subtask.id,
+        'title': subtask.title,
+        'description': subtask.description,
+        'due_date': subtask.due_date.strftime('%Y-%m-%d') if subtask.due_date else '',
+        'status': subtask.status,
+    }
+    
+    return JsonResponse(data)

@@ -1,0 +1,456 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block title %}
+  Detalhes da Tarefa - {{ task.title }}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="task-details">
+      <div class="task-property">
+        <strong>Título:</strong> {{ task.title }}
+      </div>
+      <div class="task-property">
+        <strong>Descrição:</strong> {{ task.description }}
+      </div>
+      <div class="task-property">
+        <strong>Data de Criação:</strong> {{ task.created_at|date:'d/m/Y H:i' }}
+      </div>
+      <div class="task-property">
+        <strong>Data Limite:</strong> {% if task.due_date %}
+          {{ task.due_date|date:'d/m/Y' }}
+        {% else %}
+          Não definida
+        {% endif %}
+      </div>
+      <div class="task-property">
+        <strong>Prioridade:</strong> {{ task.priority }}
+      </div>
+      <div class="task-property">
+        <strong>Status:</strong> {{ task.status }}
+      </div>
+      <div class="task-property">
+        <strong>Responsável:</strong> {{ task.assigned_to|default:'Não atribuído' }}
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-edit" id="editTaskBtn">Editar Tarefa</button>
+      <a href="{% url 'task_list' %}" class="btn">Voltar à Lista</a>
+    </div>
+
+    <div class="subtask-list">
+      <h2>Subtarefas</h2>
+      <button class="btn btn-add" id="addSubtaskBtn">Adicionar Subtarefa</button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Data Limite</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for subtask in subtasks %}
+            <tr>
+              <td>{{ subtask.title }}</td>
+              <td>{{ subtask.description|truncatechars:50 }}</td>
+              <td>{{ subtask.status }}</td>
+              <td>
+                {% if subtask.due_date %}
+                  {{ subtask.due_date|date:'d/m/Y' }}
+                {% else %}
+                  Não definida
+                {% endif %}
+              </td>
+              <td>
+                <button class="btn btn-edit btn-small editSubtaskBtn" data-id="{{ subtask.id }}">Editar</button>
+                <form method="post" action="{% url 'delete_subtask' subtask.id %}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja excluir esta subtarefa?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-delete btn-small">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" style="text-align: center;">Nenhuma subtarefa encontrada.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal de Edição de Tarefa -->
+  <div id="editTaskModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Editar Tarefa</h2>
+      <form id="editTaskForm" action="{% url 'update_task' task.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ task_form.title.id_for_label }}">Título:</label>
+          {{ task_form.title }}
+        </div>
+        <div class="form-group">
+          <label for="{{ task_form.description.id_for_label }}">Descrição:</label>
+          {{ task_form.description }}
+        </div>
+        <div class="form-group">
+          <label for="{{ task_form.due_date.id_for_label }}">Data Limite:</label>
+          {{ task_form.due_date }}
+        </div>
+        <div class="form-group">
+          <label for="{{ task_form.priority.id_for_label }}">Prioridade:</label>
+          {{ task_form.priority }}
+        </div>
+        <div class="form-group">
+          <label for="{{ task_form.status.id_for_label }}">Status:</label>
+          {{ task_form.status }}
+        </div>
+        <div class="form-group">
+          <label for="{{ task_form.assigned_to.id_for_label }}">Responsável:</label>
+          {{ task_form.assigned_to }}
+        </div>
+        <button type="submit" class="btn">Salvar Alterações</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Adição de Subtarefa -->
+  <div id="addSubtaskModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Adicionar Subtarefa</h2>
+      <form id="addSubtaskForm" action="{% url 'add_subtask' task.id %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="{{ subtask_form.title.id_for_label }}">Título:</label>
+          {{ subtask_form.title }}
+        </div>
+        <div class="form-group">
+          <label for="{{ subtask_form.description.id_for_label }}">Descrição:</label>
+          {{ subtask_form.description }}
+        </div>
+        <div class="form-group">
+          <label for="{{ subtask_form.due_date.id_for_label }}">Data Limite:</label>
+          {{ subtask_form.due_date }}
+        </div>
+        <div class="form-group">
+          <label for="{{ subtask_form.status.id_for_label }}">Status:</label>
+          {{ subtask_form.status }}
+        </div>
+        <button type="submit" class="btn">Adicionar</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de Edição de Subtarefa -->
+  <div id="editSubtaskModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Editar Subtarefa</h2>
+      <form id="editSubtaskForm" action="" method="POST">
+        {% csrf_token %}
+        <input type="hidden" id="subtask_id" name="subtask_id" />
+        <div class="form-group">
+          <label for="edit_subtask_title">Título:</label>
+          <input type="text" id="edit_subtask_title" name="title" required />
+        </div>
+        <div class="form-group">
+          <label for="edit_subtask_description">Descrição:</label>
+          <textarea id="edit_subtask_description" name="description"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="edit_subtask_due_date">Data Limite:</label>
+          <input type="date" id="edit_subtask_due_date" name="due_date" />
+        </div>
+        <div class="form-group">
+          <label for="edit_subtask_status">Status:</label>
+          <select id="edit_subtask_status" name="status">
+            <option value="Pendente">Pendente</option>
+            <option value="Em Andamento">Em Andamento</option>
+            <option value="Concluída">Concluída</option>
+          </select>
+        </div>
+        <button type="submit" class="btn">Salvar Alterações</button>
+      </form>
+    </div>
+  </div>
+
+  {% block extra_css %}
+    <style>
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 0px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #333;
+      }
+      .task-details {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+      }
+      .task-property {
+        margin-bottom: 10px;
+      }
+      .task-property strong {
+        display: inline-block;
+        width: 120px;
+      }
+      .subtask-list {
+        margin-top: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 5px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+      .btn-edit {
+        background-color: #2196f3;
+      }
+      .btn-delete {
+        background-color: #f44336;
+      }
+      .btn-add {
+        background-color: #4caf50;
+      }
+      .action-buttons {
+        margin: 20px 0;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+        border-radius: 5px;
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      form {
+        margin-top: 15px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input[type='text'],
+      input[type='date'],
+      textarea,
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      textarea {
+        height: 100px;
+      }
+      .messages {
+        margin-bottom: 20px;
+      }
+      .alert {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+      .alert-success {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .alert-error {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+    </style>
+  {% endblock %}
+
+  {% block extra_js %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal de edição de tarefa
+        const editTaskModal = document.getElementById('editTaskModal');
+        const editTaskBtn = document.getElementById('editTaskBtn');
+        const editTaskClose = editTaskModal.querySelector('.close');
+        
+        editTaskBtn.onclick = function() {
+            editTaskModal.style.display = 'block';
+        }
+        
+        editTaskClose.onclick = function() {
+            editTaskModal.style.display = 'none';
+        }
+        
+        // Modal de adição de subtarefa
+        const addSubtaskModal = document.getElementById('addSubtaskModal');
+        const addSubtaskBtn = document.getElementById('addSubtaskBtn');
+        const addSubtaskClose = addSubtaskModal.querySelector('.close');
+        
+        addSubtaskBtn.onclick = function() {
+            addSubtaskModal.style.display = 'block';
+        }
+        
+        addSubtaskClose.onclick = function() {
+            addSubtaskModal.style.display = 'none';
+        }
+        
+        // Modal de edição de subtarefa
+        const editSubtaskModal = document.getElementById('editSubtaskModal');
+        const editSubtaskBtns = document.querySelectorAll('.editSubtaskBtn');
+        const editSubtaskClose = editSubtaskModal.querySelector('.close');
+        
+        editSubtaskBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                const subtaskId = this.getAttribute('data-id');
+                const form = document.getElementById('editSubtaskForm');
+                form.action = `/subtask/${subtaskId}/update/`;
+                
+                // Fazer uma requisição AJAX para obter os dados da subtarefa
+                fetch(`/subtask/${subtaskId}/data/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('edit_subtask_title').value = data.title;
+                        document.getElementById('edit_subtask_description').value = data.description;
+                        document.getElementById('edit_subtask_due_date').value = data.due_date;
+                        document.getElementById('edit_subtask_status').value = data.status;
+                        editSubtaskModal.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Erro ao obter dados da subtarefa:', error);
+                    });
+            }
+        });
+        
+        editSubtaskClose.onclick = function() {
+            editSubtaskModal.style.display = 'none';
+        }
+        
+        // Fechamento dos modais ao clicar fora deles
+        window.onclick = function(event) {
+            if (event.target == editTaskModal) {
+                editTaskModal.style.display = 'none';
+            }
+            if (event.target == addSubtaskModal) {
+                addSubtaskModal.style.display = 'none';
+            }
+            if (event.target == editSubtaskModal) {
+                editSubtaskModal.style.display = 'none';
+            }
+        }
+    });
+    // Função para mostrar mensagens temporárias
+    function showMessage(message, type) {
+        const messagesDiv = document.querySelector('.messages') || document.createElement('div');
+        if (!document.querySelector('.messages')) {
+            messagesDiv.className = 'messages';
+            document.querySelector('.container').insertBefore(messagesDiv, document.querySelector('h1').nextSibling);
+        }
+        
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        
+        messagesDiv.appendChild(alert);
+        
+        // Remover a mensagem após 5 segundos
+        setTimeout(function() {
+            alert.remove();
+            if (messagesDiv.children.length === 0) {
+                messagesDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    // Manipulação de erros de formulário
+    const forms = document.querySelectorAll('form');
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let valid = true;
+            
+            requiredFields.forEach(function(field) {
+                if (!field.value.trim()) {
+                    e.preventDefault();
+                    field.classList.add('error');
+                    valid = false;
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+            
+            if (!valid) {
+                showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
+            }
+        });
+    });
+});
+</script>
+  {% endblock %}
+{% endblock %}
