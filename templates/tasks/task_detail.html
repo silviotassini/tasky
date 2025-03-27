@@ -1,7 +1,7 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% block stylesheets %}
-  <link rel="stylesheet" href="{% static 'css/list.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/task_detail.css' %}" />
 {% endblock %}
 {% block title %}
   Detalhes da Tarefa - {{ task.title }}
@@ -46,7 +46,7 @@
     </div>
 
     <div class="action-buttons">
-      <button class="btn" id="editTaskBtn">Editar</button>
+      <button class="btn" id="editTaskBtn" onclick="showTaskForm();">Editar</button>
       <button class="btn" onclick="location.href='{% url 'task_list' %}'">Voltar</button>
     </div>
 
@@ -132,29 +132,38 @@
   </div>
 
   <!-- Modal de Adição de Subtarefa -->
-  <div id="addSubtaskModal" class="modal">
+  <div id="task-modal" class="modal">
     <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Adicionar Subtarefa</h2>
-      <form id="addSubtaskForm" action="{% url 'add_subtask' task.id %}" method="POST">
+      <span class="close-button" onclick="closeTaskForm()">&times;</span>
+      <form id="edit-task-form" method="POST" action="{% url 'save_task' %}">
         {% csrf_token %}
         <div class="form-group">
-          <label for="{{ subtask_form.title.id_for_label }}">Título:</label>
-          {{ subtask_form.title }}
+          <label for="task-title">Título:</label>
+          <input type="text" id="task-title" name="title" required />
         </div>
         <div class="form-group">
-          <label for="{{ subtask_form.description.id_for_label }}">Descrição:</label>
-          {{ subtask_form.description }}
+          <label for="task-description">Descrição:</label>
+          <textarea id="task-description" name="description" required></textarea>
+        </div>
+        <div class="form-group" style="display: flex; gap: 20px;">
+          <div>
+            <label for="task-deadline">Prazo:</label>
+            <input type="date" id="task-deadline" name="deadline" required />
+          </div>
+          <div>
+            <label for="task-estimatedhour">Horas Estimadas:</label>
+            <input type="number" id="task-estimated_hours" name="estimated_hours" required />
+          </div>
         </div>
         <div class="form-group">
-          <label for="{{ subtask_form.due_date.id_for_label }}">Data Limite:</label>
-          {{ subtask_form.due_date }}
+          <label for="task-assigned">Responsável:</label>
+          <select id="task-assigned" name="assigned_to" required>
+            {% for user in users %}
+              <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+          </select>
         </div>
-        <div class="form-group">
-          <label for="{{ subtask_form.status.id_for_label }}">Status:</label>
-          {{ subtask_form.status }}
-        </div>
-        <button type="submit" class="btn">Adicionar</button>
+        <button type="submit">Salvar</button>
       </form>
     </div>
   </div>
@@ -191,126 +200,17 @@
       </form>
     </div>
   </div>
+{% endblock %}
 
-  {% block extra_js %}
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Modal de edição de tarefa
-        const editTaskModal = document.getElementById('editTaskModal');
-        const editTaskBtn = document.getElementById('editTaskBtn');
-        const editTaskClose = editTaskModal.querySelector('.close');
-        
-        editTaskBtn.onclick = function() {
-            editTaskModal.style.display = 'block';
-        }
-        
-        editTaskClose.onclick = function() {
-            editTaskModal.style.display = 'none';
-        }
-        
-        // Modal de adição de subtarefa
-        const addSubtaskModal = document.getElementById('addSubtaskModal');
-        const addSubtaskBtn = document.getElementById('addSubtaskBtn');
-        const addSubtaskClose = addSubtaskModal.querySelector('.close');
-        
-        addSubtaskBtn.onclick = function() {
-            addSubtaskModal.style.display = 'block';
-        }
-        
-        addSubtaskClose.onclick = function() {
-            addSubtaskModal.style.display = 'none';
-        }
-        
-        // Modal de edição de subtarefa
-        const editSubtaskModal = document.getElementById('editSubtaskModal');
-        const editSubtaskBtns = document.querySelectorAll('.editSubtaskBtn');
-        const editSubtaskClose = editSubtaskModal.querySelector('.close');
-        
-        editSubtaskBtns.forEach(function(btn) {
-            btn.onclick = function() {
-                const subtaskId = this.getAttribute('data-id');
-                const form = document.getElementById('editSubtaskForm');
-                form.action = `/subtask/${subtaskId}/update/`;
-                
-                // Fazer uma requisição AJAX para obter os dados da subtarefa
-                fetch(`/subtask/${subtaskId}/data/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('edit_subtask_title').value = data.title;
-                        document.getElementById('edit_subtask_description').value = data.description;
-                        document.getElementById('edit_subtask_due_date').value = data.due_date;
-                        document.getElementById('edit_subtask_status').value = data.status;
-                        editSubtaskModal.style.display = 'block';
-                    })
-                    .catch(error => {
-                        console.error('Erro ao obter dados da subtarefa:', error);
-                    });
-            }
-        });
-        
-        editSubtaskClose.onclick = function() {
-            editSubtaskModal.style.display = 'none';
-        }
-        
-        // Fechamento dos modais ao clicar fora deles
-        window.onclick = function(event) {
-            if (event.target == editTaskModal) {
-                editTaskModal.style.display = 'none';
-            }
-            if (event.target == addSubtaskModal) {
-                addSubtaskModal.style.display = 'none';
-            }
-            if (event.target == editSubtaskModal) {
-                editSubtaskModal.style.display = 'none';
-            }
-        }
-    });
-    // Função para mostrar mensagens temporárias
-    function showMessage(message, type) {
-        const messagesDiv = document.querySelector('.messages') || document.createElement('div');
-        if (!document.querySelector('.messages')) {
-            messagesDiv.className = 'messages';
-            document.querySelector('.container').insertBefore(messagesDiv, document.querySelector('h1').nextSibling);
-        }
-        
-        const alert = document.createElement('div');
-        alert.className = `alert alert-${type}`;
-        alert.textContent = message;
-        
-        messagesDiv.appendChild(alert);
-        
-        // Remover a mensagem após 5 segundos
-        setTimeout(function() {
-            alert.remove();
-            if (messagesDiv.children.length === 0) {
-                messagesDiv.remove();
-            }
-        }, 5000);
+{% block scripts %}
+  <script src="{% static 'js/task_detail.js' %}"></script>
+  <script>
+    // Fechar o modal se o usuário clicar fora dele
+    window.onclick = function (event) {
+      const modal = document.getElementById('task-modal')
+      if (event.target === modal) {
+        closeTaskForm()
+      }
     }
-    
-    // Manipulação de erros de formulário
-    const forms = document.querySelectorAll('form');
-    forms.forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            const requiredFields = form.querySelectorAll('[required]');
-            let valid = true;
-            
-            requiredFields.forEach(function(field) {
-                if (!field.value.trim()) {
-                    e.preventDefault();
-                    field.classList.add('error');
-                    valid = false;
-                } else {
-                    field.classList.remove('error');
-                }
-            });
-            
-            if (!valid) {
-                showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
-            }
-        });
-    });
-});
-</script>
-  {% endblock %}
+  </script>
 {% endblock %}

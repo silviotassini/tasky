@@ -20,7 +20,17 @@
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
     --transition-speed: 0.3s;
-    --button-danger: var(var(--color7))
+    --primary-button-color: var(--color3);
+    --primary-light-color: var(--color1);
+    --primary-button-hover-color: #69a183;
+    --button-danger: var(var(--color7));
+    --modal-background-color: var(--color1);
+
+    --background-color: var(--color6);
+    --card-background-color: white;
+    --text-color: var(--color5);
+    --border-color: #ddd;
+    --menu-background-color: var(--color2);
 }
 
 * {
